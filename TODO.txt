@@ -1,0 +1,50 @@
+
+*I. SDP
+    * Parse SDP
+    * Generate SDP
+    * Generate self-signed client certificate.
+    * Calculate SHA-256 hash of DER certificate
+    * Populate answer with correct values (certificate fingerprint,
+      etc.)
+    * Send Answer
+
+II. ICE
+    * Generate username/password
+    * Determine local IPv4 address (?)
+    * Parse ICE
+    - Collect the relevant peer candidate (matches local address?)
+    - Bind a UDP socket to the peer
+    - Send our sole candidate (local address)
+    - STUN request -> peer
+    - STUN response from peer
+    - STUN respond to peer's request
+
+IV. DTLS
+    - Add DTLS example code
+    - DTLS client hello
+    - see what happens
+
+ICE headers on DTLS payload?
+Open Data Channels
+Talk SCTP!
+
+Final steps:
+    1. Audit Cargo.toml dependencies
+
+
+
+Multiplexing Scheme Updates for Secure Real-time Transport Protocol (SRTP) Extension for Datagram Transport Layer Security (DTLS)
+https://tools.ietf.org/html/rfc7983
+First-byte demux:
+
+                    +----------------+
+                    |        [0..3] -+--> forward to STUN
+                    |                |
+                    |      [16..19] -+--> forward to ZRTP
+                    |                |
+        packet -->  |      [20..63] -+--> forward to DTLS
+                    |                |
+                    |      [64..79] -+--> forward to TURN Channel
+                    |                |
+                    |    [128..191] -+--> forward to RTP/RTCP
+                    +----------------+

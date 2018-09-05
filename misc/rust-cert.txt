@@ -1,0 +1,26 @@
+Certificate:
+    Data:
+        Version: 1 (0x0)
+        Serial Number:
+            27:49:da:58:b2:5d:5c:cb
+        Signature Algorithm: ecdsa-with-SHA256
+        Issuer: CN=WebRTC
+        Validity
+            Not Before: Sep  8 03:32:31 2018 GMT
+            Not After : Oct  9 03:32:31 2018 GMT
+        Subject: CN=WebRTC
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+            EC Public Key:
+                pub: 
+                    04:42:fe:52:f3:ba:d0:13:8a:e1:f3:33:06:52:10:
+                    a6:eb:c8:98:6e:d3:5f:2b:17:bb:4c:d3:1b:05:42:
+                    b4:36:d9:dd:7b:e2:61:c6:c9:b8:f2:b3:c2:4a:fc:
+                    37:4a:89:3d:1d:ad:38:72:bc:cb:52:0f:cf:ee:fc:
+                    23:9b:f9:0c:98
+                ASN1 OID: prime256v1
+    Signature Algorithm: ecdsa-with-SHA256
+        30:46:02:21:00:c9:12:4c:5d:f5:7c:c4:81:a7:7a:35:f1:94:
+        4a:d2:29:10:b1:ee:b4:bb:a5:ba:22:08:3d:fe:7f:2a:e7:9c:
+        9c:02:21:00:d1:fe:69:f7:14:8c:ed:f7:67:52:2e:06:63:e9:
+        f2:d7:ba:f1:35:c6:62:80:73:13:52:b1:d9:39:79:00:3b:61

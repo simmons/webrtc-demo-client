@@ -1,0 +1,90 @@
+
+Firefox offer
+============================================================
+
+RTCSessionDescription { type: "offer", sdp: "v=0\r\no=mozilla...THIS_IS_SDPARTA-62.0 305778100508406010 0 IN IP4 0.0.0.0\r\ns=-\r\nt=0 0\r\na=sendrecv\r\na=fingerprint:sha-256 BA:B2:2E:A4:76:BA:C4:A2:8A:1F:65:40:46:E0:8F:D0:71:45:2B:5B:66:D6:FE:92:C8:F5:52:FA:E2:7B:75:26\r\na=group:BUNDLE sdparta_0\r\na=ice-options:trickle\r\na=msid-semantic:WMS *\r\nm=application 9 DTLS/SCTP 5000\r\nc=IN IP4 0.0.0.0\r\na=sendrecv\r\na=ice-pwd:0c983e9d4b327c3e03b2307929f05437\r\na=ice-ufrag:1db47d87\r\na=mid:sdparta_0\r\na=sctpmap:5000 webrtc-datachannel 256\r\na=setup:actpass\r\na=max-message-size:1073741823\r\n" }
+
+v=0
+o=mozilla...THIS_IS_SDPARTA-62.0 305778100508406010 0 IN IP4 0.0.0.0
+s=-
+t=0 0
+a=sendrecv
+a=fingerprint:sha-256 BA:B2:2E:A4:76:BA:C4:A2:8A:1F:65:40:46:E0:8F:D0:71:45:2B:5B:66:D6:FE:92:C8:F5:52:FA:E2:7B:75:26
+a=group:BUNDLE sdparta_0
+a=ice-options:trickle
+a=msid-semantic:WMS *
+
+m=application 9 DTLS/SCTP 5000
+c=IN IP4 0.0.0.0
+a=sendrecv
+a=ice-pwd:0c983e9d4b327c3e03b2307929f05437
+a=ice-ufrag:1db47d87
+a=mid:sdparta_0
+a=sctpmap:5000 webrtc-datachannel 256
+a=setup:actpass
+a=max-message-size:1073741823
+
+
+Chrome answer
+============================================================
+
+v=0
+o=- 1561367523461712467 2 IN IP4 127.0.0.1
+s=-
+t=0 0
+a=group:BUNDLE sdparta_0
+a=msid-semantic: WMS
+
+m=application 9 DTLS/SCTP 5000
+c=IN IP4 0.0.0.0
+b=AS:30
+a=ice-ufrag:b/DP
+a=ice-pwd:5AT/bCtclVcE1UDc8I3p/0w2
+a=ice-options:trickle
+a=fingerprint:sha-256 F8:41:CE:45:14:A3:00:91:88:69:F1:5B:32:83:75:C5:C0:B2:79:12:93:CA:8E:8C:89:5B:79:C1:91:68:E3:7B
+a=setup:active
+a=mid:sdparta_0
+a=sctpmap:5000 webrtc-datachannel 1024
+
+Chrome offer
+============================================================
+
+v=0
+o=- 3517670525970367566 2 IN IP4 127.0.0.1
+s=-
+t=0 0
+a=group:BUNDLE data
+a=msid-semantic: WMS
+
+m=application 9 DTLS/SCTP 5000
+c=IN IP4 0.0.0.0
+a=ice-ufrag:O2y3
+a=ice-pwd:5BqpwH1HUcN4ijl4WREsqh66
+a=ice-options:trickle
+a=fingerprint:sha-256 E7:9F:CF:EE:4B:FE:19:58:BF:98:8E:2C:E0:ED:65:30:4F:64:54:A4:EC:20:FD:99:96:B0:D1:7C:3A:9C:77:AB
+a=setup:actpass
+a=mid:data
+a=sctpmap:5000 webrtc-datachannel 1024
+
+Firefox answer
+============================================================
+
+v=0
+o=mozilla...THIS_IS_SDPARTA-62.0 3624786973825708002 0 IN IP4 0.0.0.0
+s=-
+t=0 0
+a=fingerprint:sha-256 00:CF:41:76:CF:6B:81:9D:72:BD:1D:3B:1C:5E:C4:C4:42:A9:8D:6A:A6:90:46:0E:C1:FE:B2:AF:08:2D:B6:7A
+a=group:BUNDLE data
+a=ice-options:trickle
+a=msid-semantic:WMS *
+
+m=application 9 DTLS/SCTP 5000
+c=IN IP4 0.0.0.0
+a=sendrecv
+a=ice-pwd:2e6983d1b756124bff54d798f64d4f0f
+a=ice-ufrag:61b63881
+a=mid:data
+a=sctpmap:5000 webrtc-datachannel 256
+a=setup:active
+a=max-message-size:1073741823
+
