@@ -37,10 +37,21 @@ There are a number of hacks and shortcuts taken:
 How to run the demo
 ----------------------------------------
 
-NOTE: At this time, I've only tested this demo on Mac OS 10.11.6.  I don't know
-of any particular problems that would arise on other operating systems, but I
-suppose there's a possibility that some dependencies (e.g. `openssl` and
-`get_if_addrs`) might not work as I expect.
+NOTE: At this time, I've only tested this demo on Mac OS 10.11.6 and
+Ubuntu 18.04.  I don't know of any particular problems that would arise
+on other operating systems, but I suppose there's a possibility that
+some dependencies (e.g. `openssl` and `get_if_addrs`) might not work as
+I expect.
+
+On Ubuntu 18.04, I needed to install a few extra packages to satisfy the
+openssl crate:
+```
+sudo apt install build-essential libssl-dev pkg-config
+```
+
+Building on Mac OS likely has similar requirements.  (Development tools?
+The Homebrew OpenSSL package?)  I'm not sure of the exact requirements,
+though, since my Macs would have already had those things installed.
 
 Three crates need to be cloned from GitHub:
 
