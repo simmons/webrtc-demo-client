@@ -59,9 +59,9 @@ Set up the repositories:
 ```
 $ mkdir work
 $ cd work
-$ git clone git@github.com:simmons/webrtc-demo-client.git
-$ git clone git@github.com:simmons/webrtc-demo-server.git
-$ git clone git@github.com:simmons/webrtc-sctp.git
+$ git clone https://github.com/simmons/webrtc-demo-client.git
+$ git clone https://github.com/simmons/webrtc-demo-server.git
+$ git clone https://github.com/simmons/webrtc-sctp.git
 $ ( cd webrtc-demo-server && git checkout demo )
 $ ( cd webrtc-sctp && git checkout demo )
 ```
