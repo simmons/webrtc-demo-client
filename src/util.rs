@@ -3,19 +3,32 @@
 use std::io::Write;
 use std::net::{IpAddr, Ipv4Addr};
 
-use get_if_addrs::get_if_addrs;
+use get_if_addrs::{get_if_addrs, Interface};
 use tokio;
 
 /// To support the bare-bones nature of this proof-of-concept code, return the first non-loopback
 /// IPv4 address of this host.
 pub fn get_local_address() -> Ipv4Addr {
+    fn log_candidate(iface: &Interface, message: &str) {
+        info!("interface candidate {} {:?} {}", iface.name, iface.ip(), message);
+    }
+
+    info!("Scanning for a suitable local network interface...");
     for iface in get_if_addrs().unwrap() {
         if iface.is_loopback() {
+            log_candidate(&iface, "rejected due to being a loopback interface.");
+            continue;
+        }
+        if iface.name.starts_with("docker") || iface.name.starts_with("veth") {
+            log_candidate(&iface, "rejected due to being a docker interface.");
             continue;
         }
         let ip = iface.ip();
         if let IpAddr::V4(ip) = ip {
+            log_candidate(&iface, "accepted.");
             return ip;
+        } else {
+            log_candidate(&iface, "rejected due to not being an IPv4 address.");
         }
     }
     panic!("No non-loopback IPv4 interface was found.");

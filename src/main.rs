@@ -56,6 +56,20 @@ fn main() {
     }
     env_logger::init();
 
+    // Determine our local non-loopback IPv4 address.
+    let args: Vec<String> = ::std::env::args().collect();
+    let local_address = if args.len() > 1 {
+        match args[1].parse() {
+            Ok(ip) => {
+                info!("Using user-provided local address: {:?}", ip);
+                ip
+            },
+            Err(_) => panic!("Cannot parse IP address given as command-line argument.")
+        }
+    } else {
+        util::get_local_address()
+    };
+
     // Generate a new private key and self-signed certificate for this session.
     let identity = crypto::Identity::generate().unwrap();
     // Generate a new ICE context for this session.
@@ -109,7 +123,7 @@ fn main() {
 
                                                 // HACK: For this same-host demonstration, we can
                                                 // just look for the peer IP that matches our IP.
-                                                if s.ip() == &util::get_local_address() {
+                                                if s.ip() == &local_address {
                                                     ice.candidate = Some(candidate);
                                                     let peer = PeerConnection::new(handle.clone(), identity.clone(), ice.clone());
 
