@@ -26,17 +26,9 @@ pub enum SetupRole {
 }
 
 #[derive(Debug)]
-pub struct SctpMap {
-    // "a=sctpmap:5000 webrtc-datachannel 256"
-    port: u16, // maps to the port number in the m-line
-    application: String,
-    streams: u16,
-}
-
-#[derive(Debug)]
 pub enum Attribute {
     Fingerprint(Vec<u8>),
-    SctpMap(SctpMap),
+    SctpPort(u16),
     Setup(SetupRole),
     Mid(String),
     IceUsername(String),
@@ -194,9 +186,12 @@ impl FromStr for Attribute {
                 ).map_err(|_| "error hex-decoding hash")?;
                 Attribute::Fingerprint(hash)
             }
-            "sctpmap" => {
-                Attribute::SctpMap(value.map(|s| s.parse()).ok_or("missing sctpmap value")??)
-            }
+            "sctp-port" => Attribute::SctpPort(
+                value
+                    .map(|s| s.parse::<u16>())
+                    .ok_or("missing sctp-port value")?
+                    .map_err(|_| "incorrect sctp-port value")?,
+            ),
             "setup" => Attribute::Setup(value.map(|s| s.parse()).ok_or("missing setup value")??),
             "mid" => Attribute::Mid(value.map(|s| s.to_string()).ok_or("missing mid value")?),
             "ice-ufrag" => {
@@ -220,7 +215,7 @@ impl ToString for Attribute {
                     .collect::<Vec<String>>()
                     .join(":")
             ),
-            Attribute::SctpMap(sm) => format!("sctpmap:{}", sm.to_string()),
+            Attribute::SctpPort(sm) => format!("sctp-port:{}", sm.to_string()),
             Attribute::Setup(s) => format!("setup:{}", s.to_string()),
             Attribute::Mid(s) => format!("mid:{}", s.to_string()),
             Attribute::IceUsername(s) => format!("ice-ufrag:{}", s.to_string()),
@@ -263,32 +258,6 @@ impl ToString for MediaDescription {
             self.protocol,
             self.format.join(" ")
         )
-    }
-}
-
-impl FromStr for SctpMap {
-    type Err = DemoError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut split = s.split_whitespace();
-        Ok(SctpMap {
-            port: split
-                .next()
-                .ok_or("sctpmap: no port")?
-                .parse()
-                .map_err(|_| "sctpmap: cannot parse port number")?,
-            application: split.next().ok_or("sctpmap: no app")?.to_string(),
-            streams: split
-                .next()
-                .ok_or("sctpmap: no streams")?
-                .parse()
-                .map_err(|_| "sctpmap: cannot parse stream number")?,
-        })
-    }
-}
-
-impl ToString for SctpMap {
-    fn to_string(&self) -> String {
-        format!("{} {} {}", self.port, self.application, self.streams)
     }
 }
 
@@ -352,9 +321,9 @@ impl SimpleSession {
         panic!("no fingerprint");
     }
     #[allow(dead_code)]
-    fn sctp_map(&self) -> &SctpMap {
+    fn sctp_port(&self) -> &u16 {
         for attribute in self.attrs() {
-            if let Attribute::SctpMap(ref sm) = attribute {
+            if let Attribute::SctpPort(ref sm) = attribute {
                 return sm;
             }
         }
@@ -412,7 +381,8 @@ impl SimpleSession {
         // the actual port via ICE.
         const DISCARD_PORT: u16 = 9;
         const SCTP_PORT: u16 = 5000;
-        static PROTOCOL: &str = "DTLS/SCTP";
+        static PROTOCOL: &str = "UDP/DTLS/SCTP";
+        static FORMAT: &str = "webrtc-datachannel";
         // Use the IPv4 localhost address in SDP.  The actual address will be negotiated via ICE.
         let address = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
 
@@ -440,7 +410,7 @@ impl SimpleSession {
                 media: "application".to_string(),
                 port: DISCARD_PORT, // discard port -- use ICE for port number.
                 protocol: PROTOCOL.to_string(),
-                format: vec![SCTP_PORT.to_string()],
+                format: vec![FORMAT.to_string()],
                 attributes: vec![
                     Attribute::IceUsername(ice.username.clone()),
                     Attribute::IcePassword(ice.password.clone()),
@@ -449,11 +419,7 @@ impl SimpleSession {
                     Attribute::Setup(SetupRole::Active),
                     // Reflect the mid used in the offer.
                     Attribute::Mid(mid.to_string()),
-                    Attribute::SctpMap(SctpMap {
-                        port: SCTP_PORT,
-                        application: "webrtc-datachannel".to_string(),
-                        streams: 1024,
-                    }),
+                    Attribute::SctpPort(SCTP_PORT),
                 ],
             }],
         };
@@ -471,7 +437,7 @@ impl FromStr for SimpleSession {
         }
 
         let mut has_fingerprint = false;
-        let mut has_sctpmap = false;
+        let mut has_sctp_port = false;
         let mut has_setup = false;
         for attribute in ss
             .inner
@@ -483,7 +449,7 @@ impl FromStr for SimpleSession {
         {
             match attribute {
                 Attribute::Fingerprint(_) => has_fingerprint = true,
-                Attribute::SctpMap(_) => has_sctpmap = true,
+                Attribute::SctpPort(_) => has_sctp_port = true,
                 Attribute::Setup(_) => has_setup = true,
                 _ => {}
             }
@@ -491,12 +457,12 @@ impl FromStr for SimpleSession {
         for attribute in ss.inner.attributes.iter() {
             match attribute {
                 Attribute::Fingerprint(_) => has_fingerprint = true,
-                Attribute::SctpMap(_) => has_sctpmap = true,
+                Attribute::SctpPort(_) => has_sctp_port = true,
                 Attribute::Setup(_) => has_setup = true,
                 _ => {}
             }
         }
-        if !has_fingerprint || !has_sctpmap || !has_setup {
+        if !has_fingerprint || !has_sctp_port || !has_setup {
             return Err("missing critical attribute(s)".into());
         }
 
@@ -515,7 +481,7 @@ mod tests {
     use super::*;
 
     // Firefox offer
-    static SDP1: &str = "v=0\r\no=mozilla...THIS_IS_SDPARTA-62.0 305778100508406010 0 IN IP4 0.0.0.0\r\ns=-\r\nt=0 0\r\na=sendrecv\r\na=fingerprint:sha-256 BA:B2:2E:A4:76:BA:C4:A2:8A:1F:65:40:46:E0:8F:D0:71:45:2B:5B:66:D6:FE:92:C8:F5:52:FA:E2:7B:75:26\r\na=group:BUNDLE sdparta_0\r\na=ice-options:trickle\r\na=msid-semantic:WMS *\r\nm=application 9 DTLS/SCTP 5000\r\nc=IN IP4 0.0.0.0\r\na=sendrecv\r\na=ice-pwd:0c983e9d4b327c3e03b2307929f05437\r\na=ice-ufrag:1db47d87\r\na=mid:sdparta_0\r\na=sctpmap:5000 webrtc-datachannel 256\r\na=setup:actpass\r\na=max-message-size:1073741823\r\n";
+    static SDP1: &str = "v=0\r\no=mozilla...THIS_IS_SDPARTA-76.0.1 6398396600349405389 0 IN IP4 0.0.0.0\r\ns=-\r\nt=0 0\r\na=sendrecv\r\na=fingerprint:sha-256 CD:1B:8B:E7:FE:06:A5:21:98:43:48:B0:82:04:55:56:59:BC:9E:F4:EB:7A:EF:FB:32:CA:AF:EC:C5:A0:0E:C9\r\na=group:BUNDLE 0\r\na=ice-options:trickle\r\na=msid-semantic:WMS *\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=sendrecv\r\na=ice-pwd:e154da96f6e063cb6319062c340ba290\r\na=ice-ufrag:a856c19d\r\na=mid:0\r\na=setup:actpass\r\na=sctp-port:5000\r\na=max-message-size:1073741823\r\n";
 
     #[test]
     fn test_sdp() {
