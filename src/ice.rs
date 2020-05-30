@@ -5,6 +5,7 @@ use hex;
 use rand::{self, RngCore};
 
 use error::DemoError;
+use util;
 
 #[derive(Clone)]
 pub struct IcePeer {
@@ -68,7 +69,8 @@ impl FromStr for Candidate {
         let ip = split.next().ok_or("bad ip")?;
         let port = split.next().ok_or("bad port")?;
         let address = SocketAddr::new(
-            ip.parse().map_err(|_| "cannot parse IP address")?,
+            // TODO: detect ".local" domains and perform mDNS lookups
+            ip.parse().unwrap_or(util::get_local_address().into()),
             port.parse().map_err(|_| "cannot parse port number")?,
         );
         split.next().filter(|s| s == &"typ").ok_or("no typ")?;
@@ -174,10 +176,12 @@ mod tests {
     static CANDIDATE2: &str = "candidate:2933284416 1 udp 2113939711 2601:280:5a80:1600:7c91:82e6:d1b8:8e14 53378 typ host generation 0 ufrag eHA1 network-cost 50";
     static CANDIDATE3: &str = "candidate:842163049 1 udp 1677729535 67.161.192.48 53377 typ srflx raddr 192.168.74.16 rport 53377 generation 0 ufrag eHA1 network-cost 50";
     static CANDIDATE4: &str = "candidate:4231669940 1 udp 1677732095 2601:280:5a80:1600:7874:79a8:e1b1:ab05 53378 typ srflx raddr 2601:280:5a80:1600:7c91:82e6:d1b8:8e14 rport 53378 generation 0 ufrag eHA1 network-cost 50";
+    static CANDIDATE5: &str = "candidate:0 1 UDP 2122187007 617f2e0c-f25f-4595-8143-9dd5eb1d85e5.local 42950 typ host";
+    static CANDIDATE6: &str = "candidate:6 1 TCP 2105458943 617f2e0c-f25f-4595-8143-9dd5eb1d85e5.local 9 typ host tcptype active";
 
     #[test]
     fn test_sdp() {
-        let candidate_strings = &[CANDIDATE1, CANDIDATE2, CANDIDATE3, CANDIDATE4];
+        let candidate_strings = &[CANDIDATE1, CANDIDATE2, CANDIDATE3, CANDIDATE4, CANDIDATE5, CANDIDATE6];
         for candidate_string in candidate_strings {
             let candidate: Candidate = candidate_string.parse().unwrap();
             let s = candidate.to_string();
